@@ -20,101 +20,89 @@ public class SignUpTest {
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
+    // Utility reusable Methods
+    public void click(By locator) {
+        try {
+            WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
+            element.click();
+        } catch (Exception e) {
+            System.out.println("Failed to click element: " + locator);
+            Assert.fail("Click failed: " + e.getMessage());
+        }
+    }
+
+    public void type(By locator, String text) {
+        try {
+            WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
+            element.clear();
+            element.sendKeys(text);
+        } catch (Exception e) {
+            System.out.println("Failed to type in element: " + locator);
+            Assert.fail("Typing failed: " + e.getMessage());
+        }
+    }
+
+    public void scrollIntoView(By locator) {
+        try {
+            WebElement element = driver.findElement(locator);
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
+        } catch (Exception e) {
+            System.out.println("Scroll failed for element: " + locator);
+        }
+    }
+
     @Test(priority = 0)
     public void openHomePage() {
-        try{
+        try {
             driver.get("https://cog-stg.incubatelabs.com/");
-            //Verify the correct page has loaded
-            String homePageURL = driver.getCurrentUrl();
-            Assert.assertEquals(homePageURL, "https://cog-stg.incubatelabs.com/");
-        }catch (Exception e) {
+            String actualURL = driver.getCurrentUrl();
+            Assert.assertEquals(actualURL, "https://cog-stg.incubatelabs.com/", "Unexpected homepage URL!");
+        } catch (Exception e) {
             System.out.println("Error opening the homepage: " + e.getMessage());
             Assert.fail("Failed to open home page or verify URL.");
         }
-
     }
-    // Click Sign-In-> Sign-Up -> Sign-Up with Email
-    //Click on sign in
-    @Test(priority = 1)
-    public void clickSignIn(){
-        try{
-            WebElement SignIn =  wait.until(
-                    ExpectedConditions.elementToBeClickable(By.xpath("//a[contains(@href, 'sign_in') and contains(translate(., 'SIGN IN', 'sign in'), 'sign in')]")));
-            SignIn.click();
-        }catch (TimeoutException e) {
-            System.out.println("Sign-In element not clickable within timeout.");
-            Assert.fail("Sign-In button was not clickable in time.");
-        }
 
+    @Test(priority = 1)
+    public void clickSignIn() {
+        click(By.xpath("//a[contains(@href, 'sign_in') and contains(translate(., 'SIGN IN', 'sign in'), 'sign in')]"));
     }
 
     @Test(priority = 2)
-    public void clickSignUp(){
-        try{
-            //click on sign up
-            WebElement SignUp =  wait.until(
-                    ExpectedConditions.elementToBeClickable(By.xpath("//a[contains(@href, 'sign_up') and contains(translate(., 'SIGN UP', 'sign up'), 'sign up')]")));
-            // Scroll into view if needed
-            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", SignUp);
-            SignUp.click();
-        }catch (TimeoutException e) {
-            System.out.println("Sign-Up element not clickable within timeout.");
-            Assert.fail("Sign-Up button was not clickable in time.");
-        }
+    public void clickSignUp() {
+        By signUpLocator = By.xpath("//a[contains(@href, 'sign_up') and contains(translate(., 'SIGN UP', 'sign up'), 'sign up')]");
+        scrollIntoView(signUpLocator);
+        click(signUpLocator);
     }
 
-    //click on Sign-Up with Email
     @Test(priority = 3)
-    public void signUpWithEmail(){
-        try{
-            WebElement SignUpWithEmail =  wait.until(
-                    ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='Signup with email']")));
-            SignUpWithEmail.click();
-        } catch (Exception e) {
-            System.out.println("Unexpected error: " + e.getMessage());
-            Assert.fail("Unexpected error");
-        }
-
+    public void signUpWithEmail() {
+        click(By.xpath("//a[text()='Signup with email']"));
     }
 
-    //Fill form
     @Test(priority = 4)
     public void fillForm() {
         try {
-            wait.until(ExpectedConditions.elementToBeClickable(By.name("first_name"))).sendKeys("Example");
-            driver.findElement(By.name("last_name")).sendKeys("Tester");
-            driver.findElement(By.id("email")).sendKeys("example@test.com");
-            driver.findElement(By.id("mobileNum")).sendKeys("0711234567");
-            driver.findElement(By.id("pw")).sendKeys("StrongPass1234");
-        } catch (NoSuchElementException | TimeoutException e) {
-            System.out.println("Error filling the form: " + e.getMessage());
-            Assert.fail("Form filling failed due to missing element or timeout.");
+            type(By.id("fname"), "Example");
+            type(By.id("lanme"), "Tester");
+            type(By.id("email"), "example@test.com");
+            type(By.id("mobileNum"), "0711234567");
+            type(By.id("pw"), "StrongPass1234");
         } catch (Exception e) {
-            System.out.println("Unexpected error: " + e.getMessage());
-            Assert.fail("Unexpected error during form fill.");
+            System.out.println("Error filling the form: " + e.getMessage());
+            Assert.fail("Form filling failed.");
         }
     }
 
-    // Submit form
     @Test(priority = 5)
-    public void submitForm(){
-        try{
-            WebElement Submit =  wait.until(
-                    ExpectedConditions.elementToBeClickable(By.id("submit")));
-            Submit.click();
-        }catch (NoSuchElementException | TimeoutException e) {
-            System.out.println("Error filling the form: " + e.getMessage());
-            Assert.fail("Form filling failed due to missing element or timeout.");
-        } catch (Exception e) {
-            System.out.println("Unexpected error: " + e.getMessage());
-            Assert.fail("Unexpected error during form submission.");
-        }
-
+    public void submitForm() {
+        click(By.id("submit"));
     }
 
     @AfterClass
     public void cleanup() {
-        driver.quit();
+        if (driver != null) {
+            driver.quit();
+        }
     }
-
 }
