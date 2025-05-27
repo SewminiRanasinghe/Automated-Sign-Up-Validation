@@ -30,5 +30,7 @@ Password: StrongPass1234
 
 ## Notes
 The test includes basic positive path validation only.
-
 Future improvements include adding Page Object Model (POM) and expanding test cases for negative scenarios.
+
+## LinkedIn post 
+https://www.linkedin.com/feed/update/urn:li:activity:7333190769723269127/
